@@ -62,4 +62,74 @@
 
   <script src="app.js"></script>
 </body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beleza Natura | Loja Vegana e Natural</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">Beleza <span>Natura</span></h1>
+      <nav>
+        <input id="search" placeholder="Buscar produtos..." />
+        <button id="cart-btn">🛒 Carrinho (<span id="cart-count">0</span>)</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Sua beleza natural começa aqui 🌿</h2>
+      <p>Skincare e cosméticos veganos de alta qualidade</p>
+    </section>
+
+    <section id="products" class="grid"></section>
+
+    <section id="cart-modal" class="modal hidden">
+      <div class="modal-content">
+        <button id="close-cart" class="close">×</button>
+        <h3>Seu Carrinho</h3>
+        <div id="cart-items"></div>
+        <div class="cart-summary">
+          <strong>Total: R$ <span id="cart-total">0.00</span></strong>
+          <button id="checkout-btn" class="primary">Finalizar Compra</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="checkout-modal" class="modal hidden">
+      <div class="modal-content">
+        <button id="close-checkout" class="close">×</button>
+        <h3>Finalizar Compra</h3>
+        <form id="checkout-form">
+          <label>Nome completo:<input name="name" required></label>
+          <label>Email:<input name="email" type="email" required></label>
+          <label>Endereço:<input name="address" required></label>
+          <label>Telefone:<input name="phone" required></label>
+          <label>Forma de pagamento:
+            <select name="payment" required>
+              <option value="">Selecione</option>
+              <option>Cartão de crédito</option>
+              <option>Pix</option>
+              <option>Boleto bancário</option>
+            </select>
+          </label>
+          <button type="submit" class="primary">Confirmar Pedido</button>
+        </form>
+      </div>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+  </main>
+
+  <footer class="footer">
+    © 2025 Beleza Natura — Cosméticos Veganos 🌿
+  </footer>
+
+  <script src="app.js"></script>
+</body>
 </html>

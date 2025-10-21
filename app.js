@@ -141,3 +141,104 @@ searchInput.addEventListener('input', e=>{
 // inicialização
 renderProducts();
 renderCartCount();
+// Lista de produtos
+const PRODUCTS = [
+  { id: "p1", title: "Base Líquida Vegana 30ml", price: 90.90, img: "https://via.placeholder.com/220x160?text=Base+Vegana" },
+  { id: "p2", title: "Hidratante Facial Natural", price: 79.90, img: "https://via.placeholder.com/220x160?text=Hidratante" },
+  { id: "p3", title: "Sérum de Vitamina C", price: 129.90, img: "https://via.placeholder.com/220x160?text=Serum+VitC" },
+  { id: "p4", title: "Protetor Solar Vegano", price: 99.90, img: "https://via.placeholder.com/220x160?text=Protetor" }
+];
+
+let cart = JSON.parse(localStorage.getItem('cart')) || {};
+const productsEl = document.getElementById('products');
+const cartCountEl = document.getElementById('cart-count');
+const cartModal = document.getElementById('cart-modal');
+const checkoutModal = document.getElementById('checkout-modal');
+const cartItemsEl = document.getElementById('cart-items');
+const cartTotalEl = document.getElementById('cart-total');
+const toast = document.getElementById('toast');
+
+function saveCart(){ localStorage.setItem('cart', JSON.stringify(cart)); }
+function formatBRL(v){ return v.toFixed(2).replace('.',','); }
+
+function renderProducts(list=PRODUCTS){
+  productsEl.innerHTML = "";
+  list.forEach(p=>{
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <h4>${p.title}</h4>
+      <div class="price">R$ ${formatBRL(p.price)}</div>
+      <button class="btn" onclick="addToCart('${p.id}')">Adicionar</button>
+    `;
+    productsEl.appendChild(el);
+  });
+}
+
+function addToCart(id){
+  const prod = PRODUCTS.find(p=>p.id===id);
+  if(!cart[id]) cart[id] = { ...prod, qty:1 };
+  else cart[id].qty++;
+  saveCart();
+  updateCartCount();
+  showToast("Produto adicionado!");
+}
+
+function updateCartCount(){
+  const total = Object.values(cart).reduce((s,i)=>s+i.qty,0);
+  cartCountEl.textContent = total;
+}
+
+function renderCart(){
+  cartItemsEl.innerHTML = "";
+  let total = 0;
+  Object.values(cart).forEach(item=>{
+    total += item.price * item.qty;
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <p><strong>${item.title}</strong> — R$ ${formatBRL(item.price)} × ${item.qty}</p>
+      <button onclick="removeFromCart('${item.id}')">Remover</button>
+    `;
+    cartItemsEl.appendChild(div);
+  });
+  cartTotalEl.textContent = formatBRL(total);
+}
+
+function removeFromCart(id){
+  delete cart[id];
+  saveCart();
+  renderCart();
+  updateCartCount();
+}
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.remove('hidden');
+  setTimeout(()=>toast.classList.add('hidden'),2000);
+}
+
+// eventos
+document.getElementById('cart-btn').onclick = ()=>{ renderCart(); cartModal.classList.remove('hidden'); };
+document.getElementById('close-cart').onclick = ()=>cartModal.classList.add('hidden');
+document.getElementById('checkout-btn').onclick = ()=>{ cartModal.classList.add('hidden'); checkoutModal.classList.remove('hidden'); };
+document.getElementById('close-checkout').onclick = ()=>checkoutModal.classList.add('hidden');
+
+document.getElementById('checkout-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  const order = { customer: data, items: Object.values(cart), total: Object.values(cart).reduce((s,i)=>s+i.price*i.qty,0) };
+  
+  const res = await fetch('/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(order) });
+  const json = await res.json();
+  if(json.ok){
+    cart = {}; saveCart(); updateCartCount();
+    checkoutModal.classList.add('hidden');
+    showToast("Pedido enviado com sucesso!");
+  } else {
+    showToast("Erro ao enviar pedido!");
+  }
+});
+
+renderProducts();
+updateCartCount();
